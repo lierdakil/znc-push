@@ -1319,7 +1319,8 @@ class PushBullet(PushService):
         url = 'https://api.pushbullet.com/v2/pushes'
 
         device_iden = C.get('target')
-        auth = (C.get('secret'), '')
+        message_uri = C.get_expanded('message_uri')
+        auth = { 'Access-Token': C.get('secret') }
 
         params = {
             'type': 'note',
@@ -1330,7 +1331,11 @@ class PushBullet(PushService):
         if device_iden:
             params['device_iden'] = device_iden
 
-        return Request('POST', url, auth=auth, data=params)
+        if message_uri:
+            params['type'] = 'link'
+            params['url'] = message_uri
+
+        return Request('POST', url, headers=auth, data=params)
 
 
 class Pushover(PushService):
